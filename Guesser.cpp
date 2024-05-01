@@ -1,4 +1,5 @@
 #include "Guesser.h"
+#include <algorithm>
 #include <string>
 
 using std::string;
@@ -15,7 +16,15 @@ using std::string;
   has 100, the distance is 10.
 */
 unsigned int Guesser::distance(string guess){
-  return 0;
+    int len_secret = m_secret.length();
+    int len_guess = guess.length();
+    int dist = abs(len_secret - len_guess);
+    for (int i = 0; i < std::min(len_secret, len_guess); i++) {
+        if (m_secret[i] != guess[i]) {
+            dist++;
+        }
+    }
+    return dist;
 }
 
 /*
@@ -24,14 +33,15 @@ unsigned int Guesser::distance(string guess){
   of any Guesser object and must have a length of 32 characters or less,
   otherwise, it will be truncated at that length.
 */
-Guesser::Guesser(string secret){
-
+Guesser::Guesser(string secret) {
+    m_secret = secret.substr(0, 32);
+    m_remaining = 3;
 }
 
 /*
   Determines and returns whether the provided guess matches the secret
   phrase. However, the function also returns false if the secret is locked,
-  which happens if either (or both): 
+  which happens if either (or both):
     (A) there are no remaining guesses allowed
     (B) the function detects brute force, as indicated by a guess that has a
         distance greater than 2 from the secret
@@ -40,7 +50,16 @@ Guesser::Guesser(string secret){
   and the secret.
 */
 bool Guesser::match(string guess){
-  return true;
+    if (m_remaining == 0 || distance(guess) > 2) {
+        return false;
+    }
+    bool is_match = m_secret == guess;
+    if (is_match) {
+        m_remaining = 3;
+    } else {
+        m_remaining--;
+    }
+    return is_match;
 }
 
 /*
@@ -51,6 +70,5 @@ bool Guesser::match(string guess){
   reset to three (3).
 */
 unsigned int Guesser::remaining(){
-  return 0;
+    return m_remaining;
 }
-
